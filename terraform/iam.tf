@@ -1,6 +1,6 @@
-# Defines the IAM roles and an IAM user to assume them
+# Declare the aws_caller_identity data source to get the current AWS account ID
+data "aws_caller_identity" "current" {}
 
-# Create IAM user for assuming roles
 resource "aws_iam_user" "project_user" {
   name = "${var.project_name}-user"
 
@@ -10,12 +10,10 @@ resource "aws_iam_user" "project_user" {
   }
 }
 
-# Attach an access key to the IAM user
 resource "aws_iam_access_key" "user_access_key" {
   user = aws_iam_user.project_user.name
 }
 
-# Create admin role for full S3 access
 resource "aws_iam_role" "admin_role" {
   name = "${var.project_name}-admin"
 
@@ -23,13 +21,14 @@ resource "aws_iam_role" "admin_role" {
     Version = "2012-10-17"
     Statement = [{
       Effect = "Allow"
-      Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${aws_iam_user.project_user.name}" }
+      Principal = {
+        AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${aws_iam_user.project_user.name}"
+      }
       Action = "sts:AssumeRole"
     }]
   })
 }
 
-# Attach policy for full S3 access to admin role
 resource "aws_iam_role_policy" "admin_policy" {
   name = "admin-policy"
   role = aws_iam_role.admin_role.id
