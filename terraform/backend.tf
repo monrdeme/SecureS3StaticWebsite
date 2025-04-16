@@ -1,11 +1,12 @@
-#Tells terraform where and how to store its state file but doesn't actually create any resources (s3 bucket, DynamoDb table)
+# Configures the S3 bucket for storing Terraform state remotely
 
+# Backend configuration using S3 for remote state storage
 terraform {
   backend "s3" {
-    bucket         = "your-tf-state-bucket-name"
-    key            = "secure-static-site/terraform.tfstate"
-    region         = "us-east-1"
+    bucket         = "${var.project_name}-tf-state"
+    key            = "terraform/state.tfstate"
+    region         = "var.region"
     encrypt        = true
-    dynamodb_table = "terraform-locks"
+    dynamodb_table = "${var.project_name}-tf-locks"
   }
 }

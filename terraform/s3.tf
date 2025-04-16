@@ -1,7 +1,8 @@
-#Creates s3 bucket for hosting the site and creates another s3 bucket for logging
+# Creates the S3 bucket for hosting the website and the logging bucket. Includes bucket policies, encryption, and tagging
 
+# Creates the S3 bucket for the website
 resource "aws_s3_bucket" "website" {
-  bucket = "${var.project_name}-bucket"
+  bucket = "${var.project_name}-website"
 
   versioning {
     enabled = true
@@ -17,24 +18,25 @@ resource "aws_s3_bucket" "website" {
 
   tags = {
     Name = var.project_name
+    Environment = "Production"
   }
 }
 
+# Restrict public access to the website bucket
 resource "aws_s3_bucket_public_access_block" "website_block" {
   bucket = aws_s3_bucket.website.id
-
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_logging" "access_logs" {
-  bucket        = aws_s3_bucket.website.id
-  target_bucket = aws_s3_bucket.logs.id
-  target_prefix = "log/"
-}
-
+# Create S3 bucket for access logs
 resource "aws_s3_bucket" "logs" {
   bucket = "${var.project_name}-logs"
+
+  tags = {
+    Name        = "${var.project_name}-logs"
+    Environment = "Production"
+  }
 }
