@@ -3,7 +3,6 @@
 # Import required libraries
 import boto3
 import os
-import mimetypes
 from pathlib import Path
 from botocore.exceptions import ClientError
 
@@ -17,24 +16,34 @@ s3 = boto3.client("s3")
 # Function to upload files and check ACL
 def upload_files():
     for file in Path(LOCAL_DIRECTORY).glob("*"):
-        content_type, _ = mimetypes.guess_type(file)
-        if content_type is None:
-            content_type = "binary/octet-stream"  # default fallback
+        print(f"Uploading {file.name} with Content-Type: {get_content_type(file)}...")
+        # Upload file without setting ACL, just setting Content-Type
+        s3.upload_file(
+            str(file), 
+            BUCKET_NAME, 
+            file.name,
+            ExtraArgs={'ContentType': get_content_type(file)}
+        )
 
-        print(f"Uploading {file.name} with Content-Type: {content_type}...")
-        try:
-            s3.upload_file(
-                Filename=str(file),
-                Bucket=BUCKET_NAME,
-                Key=file.name,
-                ExtraArgs={
-                    "ContentType": content_type,
-                    "ACL": "public-read"  # Read-only access for everyone
-                }
-            )
-            print(f"[OK] Uploaded {file.name}")
-        except ClientError as e:
-            print(f"[ERROR] Failed to upload {file.name}: {e}")
+# Function to determine the content type based on file extension
+def get_content_type(file_path):
+    extension = file_path.suffix.lower()
+    if extension == ".html":
+        return "text/html"
+    elif extension == ".css":
+        return "text/css"
+    elif extension == ".js":
+        return "application/javascript"
+    elif extension == ".json":
+        return "application/json"
+    elif extension == ".jpg" or extension == ".jpeg":
+        return "image/jpeg"
+    elif extension == ".png":
+        return "image/png"
+    elif extension == ".gif":
+        return "image/gif"
+    else:
+        return "application/octet-stream"  # Default for unknown file types
 
 # Main execution
 if __name__ == "__main__":
