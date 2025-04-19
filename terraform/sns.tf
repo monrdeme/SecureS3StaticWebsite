@@ -1,4 +1,4 @@
-#Configures an SNS topic and subscription for notifications
+# Configures an SNS topic and subscription for notifications
 
 # Create SNS topic for notifications
 resource "aws_sns_topic" "security_alerts" {

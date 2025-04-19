@@ -11,3 +11,9 @@ output "secret_access_key" {
   description = "The secret access key for the IAM user"
   sensitive   = true
 }
+
+# Output the website URL
+output "website_url" {
+  value = "http://${aws_s3_bucket.website.bucket}.s3-website-${var.region}.amazonaws.com"
+  description = "URL of the static website"
+}
